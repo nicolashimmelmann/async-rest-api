@@ -1,0 +1,54 @@
+---
+openapi: 3.0.3
+info:
+  title: "A simple async rest api"
+  version: "1.0"
+servers:
+  - url: "/api/v1"
+paths:
+  /user:
+    get:
+      operationId: views.user.get
+      responses:
+        "200":
+          $ref: "#/components/responses/GetUsersResponse"
+    post:
+      operationId: views.user.post
+      requestBody:
+        $ref: "#/components/requestBodies/PostUserRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/PostUserResponse"
+
+components:
+  requestBodies:
+    PostUserRequest:
+      description: Request for storing a new user
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              username:
+                type: string
+
+  responses:
+    GetUsersResponse:
+      description: Returns all users
+      content:
+        application/json:
+          schema:
+            properties:
+              users:
+                type: array
+                items:
+                  type: string
+
+    PostUserResponse:
+      description: A user has been saved.
+      content:
+        application/json:
+          schema:
+            properties:
+              username:
+                type: string
