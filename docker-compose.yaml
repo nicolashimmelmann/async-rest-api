@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  database:
+    image: "postgres:latest"
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    networks:
+      - postgres-network
+    volumes:
+      - ./db-data/:/var/lib/postgresql/data/
+      - ./app/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 8081:80
+    env_file:
+      - .env
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=username@test.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+    networks:
+      - postgres-network
+    volumes:
+      - ./pgadmin-data/:/var/lib/pgadmin/
+    depends_on:
+      database:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./app
+    ports:
+      - 8080:8080
+    networks:
+      - postgres-network
+    depends_on:
+      database:
+        condition: service_healthy
+
+networks:
+  postgres-network:
+    driver: bridge
